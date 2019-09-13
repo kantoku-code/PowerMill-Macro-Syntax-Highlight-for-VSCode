@@ -1,0 +1,366 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "pmillmacro",
+	"scopeName": "source.pmillmacro",
+	"comment": "",
+	"patterns": [
+		{
+			"include": "#Functions"
+		},
+		{
+			"include": "#Keywords"
+		},
+		{
+			"include": "#Strings"
+		},
+		{
+			"include": "#Constants"
+		},
+		{
+			"include": "#Comments"
+		},
+		{
+			"include": "#Supports"
+		},
+		{
+			"include": "#Variables"
+		}
+	],
+	"repository": {
+		"Functions": {
+			"patterns": [
+				{
+					"captures": {
+						"1": {
+							"name": "storage.type.function-type.pmill"
+						},
+						"2": {
+							"name": "entity.name.function.pmill"
+						}
+					},
+					"match": "^\\s*(function)\\s+((?:\\w|[+\\-<>/*&=.?!$%:@\\[\\]^{}~#|])+)",
+					"name": "meta.function.pmill",
+					"comment": ""
+				}
+			]
+		},
+		"Keywords": {
+			"patterns": [
+				{
+					"comment": "()",
+                    "name": "keyword.control.pmill",
+                    "match": "(\\(|\\))"
+                },
+				{
+					"comment": "{}",
+					"name": "keyword.control.pmill",
+					"match": "(\\{|\\})"
+				},
+				{
+					"comment": "[]",
+					"name": "keyword.control.pmill",
+					"match": "(\\[|\\])"
+				},
+				{
+					"comment": "operator",
+					"name": "keyword.pmill",
+					"match": "(?<=\\(|\\s|^)(\\+|-|\\*|/|%|^|<|<=|>|>=|==|!=|=|LT|LE|GT|GE|EQ|NE|and|not|or|xor)\\s"
+				},
+				{
+					"comment": "operator !",
+					"name": "keyword.pmill",
+					"match": "(!)(\\S+)",
+					"captures": {
+						"1": {
+							"name": "keyword.pmill"
+						}
+					}
+				},
+				{
+					"comment": "control",
+					"name": "keyword.control.pmill",
+					"match": "(?i:\\b(do|while|if|switch|else|elseif|case|foreach|in|break|continue|return|default)\\b)"
+				},
+				{
+					"comment": "io",
+					"name": "keyword.control.pmill",
+					"match": "(?i:\\b(file|open|close|write|read|for|append|as|to|tracefile)\\b)"
+				},
+				{
+					"comment": "other",
+					"name": "keyword.control.pmill",
+					"match": "(?i:\\b(call|macro|include|print|print par|edit par|docommand|abort)\\b)"
+				}
+			]
+		},
+		"Strings": {
+			"patterns": [
+				{
+					"comment": "quoted-double",
+					"name": "string.quoted.double.pmill",
+					"begin": "\"",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.pmill"
+						}
+					},
+					"end": "(\")|((?:[^\\\\\\n])$)",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.definition.string.end.pmill"
+						},
+						"2": {
+							"name": "invalid.illegal.newline.pmill"
+						}
+					}
+				},
+				{
+					"comment": "quoted-single",
+					"name": "string.quoted.single.pmill",
+					"begin": "'",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.pmill"
+						}
+					},
+					"end": "(\\')|((?:[^\\\\\\n])$)",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.definition.string.end.pmill"
+						},
+						"2": {
+							"name": "invalid.illegal.newline.pmill"
+						}
+					}
+				}
+			]
+		},
+		"Constants": {
+			"patterns": [
+				{
+					"name": "constant.numeric.pmill",
+					"match": "\\b(([0-9]+\\.?[0-9]*)|([0-9]+\\.?[0-9]*)((e|E)(\\+|-)?[0-9]+)?)\\b"
+				},
+				{
+					"comment":"language",
+					"name": "constant.language.pmill",
+					"match": "(?i:\\s*\\b(false|true|crlf)\\b)"
+				}
+			]
+		},
+		"Comments": {
+			"name": "meta.comment",
+			"begin": "(^[ \\t]+)?(?=//)",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.whitespace.comment.leading.pmill"
+				}
+			},
+			"end": "(?!\\G)",
+			"patterns": [
+				{
+					"begin": "//",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.pmill"
+						}
+					},
+					"end": "\\n",
+					"name": "comment.line.apostrophe.pmill"
+				}
+			]
+		},
+		"Supports": {
+			"patterns": [
+				{
+					"include": "#type"
+				},
+				{
+					"include": "#collection"
+				},
+				{
+					"include": "#function"
+				}
+			],
+			"repository": {
+				"type": {
+					"match": "(?i:\\b(int|real|bool|string|entity|object)\\b)",
+					"name": "support.type.pmill"
+				},
+				"collection": {
+					"match": "(?i:\\b(list|array)\\b)",
+					"name": "support.class.collection.pmill"
+				},
+				"function": {
+					"patterns": [
+						{
+							"name": "storage.type.function.tigonometric.pmill",
+							"match": "(?i:\\b(sin|cos|tan|asin|acos|atan|atan2)\\b)"
+						},
+						{
+							"name": "support.function.general-math.pmill",
+							"match": "(?i:\\b(exp|ln|log|sqrt|abs|sign|compare)\\b)"
+						},
+						{
+							"name": "support.function.string.pmill",
+							"match": "(?i:\\b(length|position|replace|substring|ucase|lcase|ltrim|rtrim|trim|tokens|evaluate|sanitize|strip_new_lines|map_key)\\b)"
+						},
+						{
+							"name": "support.function.colour.pmill",
+							"match": "(?i:\\b(get_colour_index|get_entity_colour)\\b)"
+						},
+						{
+							"name": "support.function.entity.pmill",
+							"match": "(?i:\\b(new_entity_name|entity_exists|toolpath_cut_limits|limits|limits_workplane_rel|segments|stockmodel_visible_volume|toolpath_component_count|level_entity|boundary_entirely_contains_toolpath|num_toolpath_segments_inside_boundary|num_toolpath_segments_outside_boundary|min_cutting_toolaxis_elevation_degrees|max_cutting_toolaxis_elevation_degrees|max_cutting_toolaxis_elevation_change_degrees|feedrate_found_in_range|check_toolpath_start_point_block|number_toolpath_components|segment_has_leadin|segment_has_leadout|component_has_colliding_sections|component_number_of_colliding_sections|component_get_colliding_section|widget|strategy_widget|selected_list_rows|checked_list_rows|list_cell_value|list_num_rows)\\b)"
+						},
+						{
+							"name": "support.function.object.pmill",
+							"match": "(?i:\\b(get_typename)\\b)"
+						},
+						{
+							"name": "support.function.squence.pmill",
+							"match": "(?i:\\b(make_sequence|next_in_sequence)\\b)"
+						},
+						{
+							"name": "support.function.ncprogram-parameter.pmill",
+							"match": "(?i:\\b(number_nctoolpaths|number_nctools|list_nctools|nctoolpath_fixtureoffset)\\b)"
+						},
+						{
+							"name": "support.function.model-components.pmill",
+							"match": "(?i:\\b(model_components_thicknessset|smart_models|smart_levels|smart_colours|select_components|deselect_components|number_selected)\\b)"
+						},
+						{
+							"name": "support.function.toolpath-point-parameter.pmill",
+							"match": "(?i:\\b(closest_point_on_toolpath|closest_point_on_toolpath|segment_point_count|segment_get_length|segment_get_point|segment_get_point_at_distance|segment_create_point_at_distance|point_parameters|point_add_parameter|point_remove_parameters)\\b)"
+						},
+						{
+							"name": "support.function.machine-tool.pmill",
+							"match": "(?i:\\b(machine|machine_axis|machine_axis)\\b)"
+						},
+						{
+							"name": "support.function.simulation.pmill",
+							"match": "(?i:\\b(simulation_location|turned_model_drawn|tool_drawn_colliding|simulation_issues|dmc_collision_state)\\b)"
+						},
+						{
+							"name": "support.function.issue.pmill",
+							"match": "(?i:\\b(issues_of_type|collisions_involving|collisions_between|tool_tip_position|tool_centre_position|tool_axis_direction|gauge_face_position|orientation_vector_direction)\\b)"
+						},
+						{
+							"name": "support.function.folder&pathname.pmill",
+							"match": "(?i:\\b(pathname|dirname|basename|project_pathname|macro_path|get_folders|get_entity_folders|active_folder|folder_exists|executable_path)\\b)"
+						},
+						{
+							"name": "support.function.list-creation.pmill",
+							"match": "(?i:\\b(components|fill|folder|entity_folder|extract|filter|apply|flatten|join|add_first|remove_first|add_last|remove_last|remove_duplicates|remove|set_union|intersection|subtract|explorer_selected_entities)\\b)"
+						},
+						{
+							"name": "support.function.list-handling.pmill",
+							"match": "(?i:\\b(sort|reverse)\\b)"
+						},
+						{
+							"name": "support.function.dictionary.pmill",
+							"match": "(?i:\\b(dict_set_value)\\b)"
+						},
+						{
+							"name": "support.function.file.pmill",
+							"match": "(?i:\\b(list_files|pwd|home|file_exists|dir_exists|project_modified|project_locked|project_readonly)\\b)"
+						},
+						{
+							"name": "support.function.type-conversion.pmill",
+							"match": "(?i:\\b(int|real|bool|string)\\b)"
+						},
+						{
+							"name": "support.function.conditional.pmill",
+							"match": "(?i:\\b(select)\\b)"
+						},
+						{
+							"name": "support.function.parameter.pmill",
+							"match": "(?i:\\b(active|locked|error|size|is_empty|member|values|state_active|to_xml|parent)\\b)"
+						},
+						{
+							"name": "support.function.statistical.pmill",
+							"match": "(?i:\\b(max|min|mean)\\b)"
+						},
+						{
+							"name": "support.function.formatting.pmill",
+							"match": "(?i:\\b(round|convert|translate|desc)\\b)"
+						},
+						{
+							"name": "support.function.vector.pmill",
+							"match": "(?i:\\b(set_vector|unit|length|angle|apparent_angle|normal|parallel|azimuth|elevation|vector_to_world)\\b)"
+						},
+						{
+							"name": "support.function.point.pmill",
+							"match": "(?i:\\b(set_point|distance|point_to_world|point_to_work)\\b)"
+						},
+						{
+							"name": "support.function.workplane.pmill",
+							"match": "(?i:\\b(set_workplane|geometry_equal)\\b)"
+						},
+						{
+							"name": "support.function.tool.pmill",
+							"match": "(?i:\\b(geometry_equal|gauge_length|stepdown_from_tool|stepover_from_tool)\\b)"
+						},
+						{
+							"name": "support.function.plugins.pmill",
+							"match": "(?i:\\b(plugin_value)\\b)"
+						},
+						{
+							"name": "support.function.user-information.pmill",
+							"match": "(?i:\\b(user_id)\\b)"
+						},
+						{
+							"name": "support.function.date&time.pmill",
+							"match": "(?i:\\b(time|local_time|utc_time|time_to_string)\\b)"
+						},
+						{
+							"name": "support.function.user-interface.pmill",
+							"match": "(?i:\\b(ribbon_is_minimised|ribbon_active_tab|ribbon_visible_tabs|ribbon_styles|ribbon_has_minimize_button)\\b)"
+						},
+						{
+							"name": "support.function.debug.pmill",
+							"match": "(?i:\\b(memory_state)\\b)"
+						},
+						{
+							"name": "support.function.dialog.pmill",
+							"match": "(?i:\\b(message info|message warn|message error|infobox|query|input|input entity|input entity multiple|input choice|input choice multiple|fileselect|macro pause)\\b)"
+						},
+						{
+							"name": "support.function.dialog-control.pmill",
+							"match": "(?i:\\b(graphics lock|graphics unlock|dialog message on|dialog message off|dialog error on|dialog error off|ECHO ON DCPDEBUG TRACE COMMAND ACCEPT|ECHO OFF DCPDEBUG UNTRACE COMMAND ACCEPT)\\b)"
+						},
+						{
+							"name": "support.function.explorer-selected.pmill",
+							"match": "(?i:\\b(powermill.Status.MultipleSelection.Last|powermill.Status.MultipleSelection.Count|powermill.Status.MultipleSelection.Total|powermill.Status.MultipleSelection.First)\\b)"
+						}
+					]
+				}
+			}
+		},
+		"Variables": {
+			"patterns": [
+				{
+					"include": "#var-other"
+				},
+				{
+					"include": "#var-other-dollar"
+				}
+			],
+			"repository": {
+				"var-other": {
+					"name": "variable.other.pmill",
+					"match": "(?i:((?<=(\\+|=|-|\\&|\\\\|/|<|>|\\(|,))\\s*\\b([a-zA-Z_x7f-xff][a-zA-Z0-9_x7f-xff]*?)\\b(?!(\\(|\\.))|\\b([a-zA-Z_x7f-xff][a-zA-Z0-9_x7f-xff]*?)\\b(?=\\s*(\\+|=|-|\\&|\\\\|/|<|>|\\(|\\)))))"
+				},
+				"var-other-dollar": {
+					"match": "(\\$)[a-zA-Z_x7f-xff][a-zA-Z0-9_x7f-xff]*?\\b\\s*",
+					"name": "variable.other.dollar.pmill",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.variable.pmill"
+						}
+					}
+				}
+			}
+		}
+	}
+}

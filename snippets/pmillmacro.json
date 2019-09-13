@@ -1,0 +1,83 @@
+{
+	"function...": {
+		"prefix": "func",
+		"body": [
+			"function ${1:FunctionName}(${2:type} ${3:Parameter}) {",
+			"\t$0",
+			"\treturn",
+			"}"
+		],
+		"description": "function..."
+	},
+	"if...": {
+		"prefix": "if",
+		"body": [
+			"if ${1:expression} {",
+			"\t$0",
+			"}"
+		],
+		"description": "if..."
+	},
+	"if..else": {
+		"prefix": "ifel",
+		"body": [
+			"if ${1:expression} {",
+			"\t$2",
+			"} else {",
+			"\t$0",
+			"}"
+		],
+		"description": "if..else"
+	},
+	"if..elseif..": {
+		"prefix": "ifelif",
+		"body": [
+			"if ${1:expression} {",
+			"\t$2",
+			"} elseif ${3:expression}  {",
+			"\t$4",
+			"} else {",
+			"\t$0",
+			"}"
+		],
+		"description": "if..elseif.."
+	},
+	"switch..case..": {
+		"prefix": "swit",
+		"body": [
+			"switch ${1:expression} {",
+			"\tcase ${2:condition}",
+			"\t\t$3",
+			"\t\tbreak",
+			"\tdefault",
+			"\t\t$0",
+			"}"
+		],
+		"description": "switch..case.."
+	},
+	"foreach...": {
+		"prefix": "fore",
+		"body": [
+			"foreach ${1:element} In ${2:group} {",
+			"\t$0",
+			"}"
+		],
+		"description": "foreach..."
+	},	
+	"while...": {
+		"prefix": "while",
+		"body": [
+			"while ${1:condition} {",
+			"\t$0",
+			"}"
+		],
+		"description": "while..."
+	},
+	"message info...": {
+		"prefix": "message",
+		"body": [
+			"message info '${0:words}'"
+		],
+		"description": "message info..."
+	}
+}

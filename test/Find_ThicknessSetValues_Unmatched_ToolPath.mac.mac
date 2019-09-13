@@ -1,0 +1,290 @@
+//pm2018 macro
+//Find_ThicknessSetValues_Unmatched_ToolPath.mac ver0.0.4
+//ﾃﾞﾌｫﾙﾄ [ｺﾝﾎﾟｰﾈﾝﾄ/残り代] と異なる設定のﾂｰﾙﾊﾟｽ名取得
+//---------------------------------------------------------------------------------------------------
+//ver0.0.1-完成
+//ver0.0.2-ｺﾝﾎﾟｰﾈﾝﾄﾁｪｯｸ追加
+//ver0.0.3-model_components_thicknessset関数使用
+//               -GetCompMatchList関数 不具合修正
+//ver0.0.4-ThicknessSetValues-Modeび取得方法変更
+//               -ShowEditThickness関数 追加
+//               -Surface Defaults以外のﾂｰﾙﾊﾟｽとの比較可能に
+//---------------------------------------------------------------------------------------------------
+//toolpath.XML
+//<menupage label="Find_ThicknessSetValues_Unmatched_ToolPath">
+//	<button label="Comparison with this Toolpath" 
+//					command='MACRO Find_ThicknessSetValues_Unmatched_ToolPath.mac "%s"' />	
+//	<button label="Comparison with Surface Defaults"
+//					command='MACRO Find_ThicknessSetValues_Unmatched_ToolPath.mac ""' />
+//</menupage>
+//---------------------------------------------------------------------------------------------------
+//
+function main(string baseName) {
+	//debug mode
+	bool debug = 0
+	
+	//check
+	call CanExec()
+	
+	//start
+	call Sw_Start()
+	graphics lock
+
+	INFOBOX NEW "***** Toolpath ThicknessSetValues info *****"
+	INFOBOX CLEAR FORMAT
+	string msg = ''
+	
+	//base ThicknessSetValues
+	if length($baseName) < 1 {
+		$msg = 'Getting ThicknessSetValues [Defaults] Info.' + crlf
+	} else {
+		$msg = 'Getting ThicknessSetValues [' + $baseName + '] Info.' + crlf
+	}
+	call PushInfobox($msg)
+	string list def_tvInfo = {}
+	int list def_cmp = {}
+	call Get_base_ThicknessSetValuesInfo($baseName, $def_tvInfo, $def_cmp)
+	
+	//filter
+	call PushInfobox('Getting Toolpath ThicknessSetValues Parameter.' + crlf)
+	string filter = ''
+	call Initfilter($def_tvInfo, $filter)
+	if $debug == 1 {
+		call WriteFile(macro_path(false) + '\filter.txt' , $filter)
+	}
+	
+	//pram match toolpath
+	call PushInfobox('Getting Parameter matched Toolpath.' + crlf)
+	entity list tps = folder('toolpath')
+	$tps =  filter($tps , $filter)
+	if $debug == 1 {
+		call WriteFile(macro_path(false) + '\Parammatch.txt' , join(extract($tps, 'name'), crlf))
+	}
+	
+	//components match toolpath
+	call PushInfobox('Getting Components matched Toolpath.' + crlf)
+	call GetCompMatchList($tps, $def_cmp, $tps)
+	
+	//unmatch
+	call PushInfobox('Getting Unmatched Toolpath.' + crlf + crlf)
+	string list all_tps =  extract(folder('toolpath'), 'name') 
+	string list match_tps =  extract($tps, 'name') 
+	string list unmatch_tps =  subtract($all_tps, $match_tps)
+	
+	//finish
+	string tm = ''
+	call Sw_GetTime($tm)	
+	
+	call ShowEditThickness($baseName)
+	
+	if length($baseName) < 1 {
+		//$msg = '[ﾃﾞﾌｫﾙﾄ]-[ｺﾝﾎﾟｰﾈﾝﾄ/残り代] と異なる設定のﾂｰﾙﾊﾟｽは以下のものです' + crlf
+		$msg = '[Surface Defaults]-[Thickness Preferences] is a toolpath that does unmatch. ' + crlf
+		
+	} else {
+		//$msg = '[' + $baseName + ']-[ｺﾝﾎﾟｰﾈﾝﾄ/残り代] と異なる設定のﾂｰﾙﾊﾟｽは以下のものです' + crlf
+		$msg = '[' + $baseName + ']-[Thickness Preferences] is a toolpath that does unmatch. ' + crlf
+	}	
+	call PushInfobox($msg)
+	call PushInfobox(join($unmatch_tps, crlf))
+	call PushInfobox(crlf + 'time : ' + $tm)
+	
+	message info  'Done'
+}
+
+//start check
+function CanExec() {
+	string list msg = {}
+	int dmy = 0
+	//toolpath
+	if size(folder('toolpath')) <1 {
+		 $dmy = add_last($msg, 'There is no toolpath to check.')
+	}
+	//model
+	if size(folder('model')) <1 {
+		 $dmy = add_last($msg, 'The model has not been imported.')
+	}
+	if not is_empty($msg) {
+		message warn join($msg, crlf)
+		macro abort
+	}
+}
+
+//Match components
+function GetCompMatchList(entity list tps, int list def_cmp, output entity list out) {
+	int list rng = {}
+	call GetRangeLst(0, size($tps), $rng)
+	$rng = reverse($rng)
+	int dmy = 0
+	string def = join($def_cmp,',')
+	string list removeLst = {}
+	foreach idx in $rng {
+		int list cmp = {}
+		call GetToolpathCompsCount($tps[$idx], $cmp) 
+		if join($cmp,',') != $def {
+			$dmy = add_last($removeLst,$tps[$idx].name)
+		}
+	}
+	
+	if not is_empty($removeLst) {
+		$out = $tps
+		return
+	}
+
+	string list txts = {}
+	foreach tp_name in $removeLst {
+		$dmy = add_last($txts, 'name != "' + $tp_name +'"')
+	}
+	$out = filter($tps, join($txts, ' and '))
+}
+
+//Toolpath components
+function GetToolpathCompsCount(entity tp, output int list comps) {
+	int list rng = {}
+	call GetRangeLst(0, size($tp.ThicknessSetValues), $rng)
+	
+	$comps = {}
+	int dmy = 0
+	foreach idx in $rng {
+		$dmy = add_last($comps,  size(model_components_thicknessset($tp, 'surfaces', $idx)))
+	}
+}
+
+//filter
+function Initfilter(string list tvs, output string out) {
+	string list prms = {'Mode', 'UseAxialThickness', 'Thickness', 'AxialThickness'}
+	int list prm_rng = {}
+	call GetRangeLst(0, size($prms), $prm_rng)
+	
+	int list tv_rng = {}
+	call GetRangeLst(0, size($tvs), $tv_rng)
+	
+	$out = ''
+	string list tmp = {}
+	int dmy = 0
+	string value = ''
+	foreach tv_idx in $tv_rng {
+		string list info = tokens($tvs[$tv_idx], ',')
+		foreach prm_idx in $prm_rng {
+			if $prm_idx == 0 {
+				$value = '"' + $info[$prm_idx] + '"'
+			} else {
+				$value = $info[$prm_idx]
+			}
+			$dmy = add_last($tmp, 'ThicknessSetValues[' + string($tv_idx) + '].' + $prms[$prm_idx] + ' == ' + $value)
+		}
+	}
+	$out = join($tmp, ' and ')
+	print = $out
+}
+
+//Base ThicknessSetValues info
+function Get_base_ThicknessSetValuesInfo(string tpname, output string list prms, output int list comps) {
+	string dmy_tp = ''
+	if length($tpname) < 1 {
+		call InitDmyTP($dmy_tp)
+	} else {
+		$dmy_tp = $tpname
+	}
+	$prms = {}
+	$comps = {}
+	call GetThickSetValInfo(entity('toolpath', $dmy_tp), $prms, $comps)
+	if length($tpname) < 1 {
+		DELETE TOOLPATH  $dmy_tp
+	}	
+}
+
+//ThicknessSetValues info
+function GetThickSetValInfo(entity tp, output string list prms, output int list comps) {
+	object list tvs = $tp.ThicknessSetValues
+	
+	int list rng = {}
+	call GetRangeLst(0, size($tvs), $rng)
+	
+	//string list mode = extract($tvs, 'Mode') //NG
+	string  list mode = tokens(join(extract($tvs, 'Mode'),','),',')
+	bool list useax = extract($tvs, 'UseAxialThickness')
+	real list thic = extract($tvs, 'Thickness')
+	real list axthic = extract($tvs, 'AxialThickness')
+	
+	$prms = {}
+	int dmy = 0
+	foreach idx in $rng {
+		object tv =  $tvs[$idx]
+		$dmy = add_last($prms,  $mode[$idx] + ',' + $useax[$idx] + ',' + $thic[$idx] + ',' + $axthic[$idx])
+	}
+	$comps = {}
+	call GetToolpathCompsCount($tp, $comps)
+}	
+
+//dammy toolpath
+function InitDmyTP(output string out) {
+	$out = new_entity_name('toolpath')
+	IMPORT TEMPLATE ENTITY TOOLPATH TMPLTSELECTORGUI 'Finishing/Constant-Z-Finishing.002.ptf'
+	FORM CANCEL STRATEGYSELECTOR\nFORM TOOLPATHIMPORT
+	EDIT TOOLPATH $out REAPPLYFROMGUI
+	YES
+	FORM ACCEPT SFConstZFinishing
+}
+
+//EditThickness
+function ShowEditThickness(string tpname) {
+	FORM THICKNESS EDIT THICKNESS TAB DEFAULT
+	
+	if length($tpname) < 1 {
+		EDIT THICKNESS TAB DEFAULT
+	} else {
+		EDIT THICKNESS TAB COMPONENTS TOOLPATH
+		ACTIVATE TOOLPATH $tpname
+	}
+}
+
+
+//** Support Function **
+//range
+function GetRangeLst(int start, int count, output int list lst) {
+	int num = $start
+	$lst = {}
+	foreach i in fill($count,0) {
+		int dmy = add_last($lst, $num)
+		$num = $num + 1
+	}
+}
+
+//infobox
+function PushInfobox(string msg) {
+	INFOBOX STYLE "NORMAL"
+	INFOBOX APPEND  $msg
+}
+
+//clock on
+function Sw_Start() {
+	CLOCK RESET QUIT
+	CLOCK ON QUIT	
+}
+
+//clock off
+function Sw_GetTime(output string out) {
+	string $TraceFilePath = macro_path(false) + "\clock.txt"
+	string list txts = {}
+	ECHO OFF DCPDEBUG UNTRACE COMMAND ACCEPT
+	TRACEFILE OPEN $TraceFilePath
+	CLOCK OFF QUIT
+	CLOCK PRINT QUIT
+	TRACEFILE CLOSE
+	ECHO ON DCPDEBUG TRACE COMMAND ACCEPT
+	
+	FILE OPEN $TraceFilePath FOR READ AS Input
+	FILE READ $txts FROM Input
+	FILE CLOSE Input
+	DELETE FILE $TraceFilePath
+
+	$out = $txts[0]
+}
+
+//WriteFile
+function WriteFile(string path ,string s) {
+	FILE OPEN $path FOR WRITE AS file
+	FILE WRITE $s TO file
+	FILE CLOSE file
+}

@@ -1,0 +1,40 @@
+{
+    "name": "powermill-macro",
+    "publisher": "kantoku",
+    "displayName": "PowerMill Macro Syntax Highlight",
+    "description": "PowerMill Macro Syntax Highlight for VSCode",
+    "version": "0.0.1",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/kantoku-code/PowerMill-Macro-Syntax-Highlight-for-VSCode.git"
+    },
+    "engines": {
+        "vscode": "^1.37.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+	"icon": "images/icon.png",
+	"keywords": [
+		"powermill",
+		"autodesk"
+	],
+    "contributes": {
+        "languages": [{
+            "id": "pmillmacro",
+            "aliases": ["PowerMill Macro", "pmillmacro"],
+            "extensions": [".mac",".inc"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "pmillmacro",
+            "scopeName": "source.pmillmacro",
+            "path": "./syntaxes/pmillmacro.tmLanguage.json"
+        }],
+		"snippets": [{
+			"language": "pmillmacro",
+			"path": "./snippets/pmillmacro.json"
+		}]
+    }
+}
